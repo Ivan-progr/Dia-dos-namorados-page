@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Para Layra</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --red: #ff355e;
+      --rose: #ff8aa1;
+      --wine: #26080f;
+      --gold: #f6c56d;
+      --paper: #fff4ec;
+      --black: #050505;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: 'Poppins', sans-serif;
+      background:
+        radial-gradient(circle at 18% 12%, rgba(255, 53, 94, .28), transparent 30%),
+        radial-gradient(circle at 82% 28%, rgba(246, 197, 109, .16), transparent 26%),
+        linear-gradient(180deg, #090909 0%, #17060a 35%, var(--wine) 65%, var(--black) 100%);
+      color: white;
+      overflow-x: hidden;
+    }
+
+    h1,
+    h2 {
+      font-family: 'Cinzel', serif;
+      letter-spacing: 3px;
+    }
+
+    .loader {
+      position: fixed;
+      inset: 0;
+      background: black;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      gap: 12px;
+      z-index: 9999;
+      transition: opacity 1.5s ease, visibility 1.5s ease;
+    }
+
+    .loader.hide {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .access-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background:
+        radial-gradient(circle at top, rgba(255, 53, 94, .24), transparent 38%),
+        linear-gradient(180deg, #050505 0%, #17060a 60%, #050505 100%);
+      transition: opacity .8s ease, visibility .8s ease;
+    }
+
+    .access-screen.hide {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .access-box {
+      width: min(520px, 100%);
+      text-align: center;
+    }
+
+    .access-box h1 {
+      color: var(--red);
+      font-size: clamp(2rem, 7vw, 3.4rem);
+      line-height: 1.1;
+      margin-bottom: 16px;
+      text-shadow: 0 0 32px rgba(255, 53, 94, .34);
+    }
+
+    .access-box p {
+      color: rgba(255, 244, 236, .82);
+      line-height: 1.8;
+      margin-bottom: 28px;
+    }
+
+    .password-digits {
+      display: grid;
+      grid-template-columns: repeat(8, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .password-digits input {
+      width: 100%;
+      aspect-ratio: 1;
+      border: 1px solid rgba(255, 255, 255, .18);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, .08);
+      color: var(--paper);
+      font: 600 clamp(1.25rem, 5vw, 1.8rem) 'Poppins', sans-serif;
+      text-align: center;
+      outline: none;
+      box-shadow: 0 0 22px rgba(255, 53, 94, .1);
+      transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
+    }
+
+    .password-digits input:focus {
+      border-color: var(--red);
+      background: rgba(255, 53, 94, .13);
+      box-shadow: 0 0 26px rgba(255, 53, 94, .25);
+    }
+
+    .password-error {
+      min-height: 24px;
+      color: var(--rose);
+      font-size: .95rem;
+    }
+
+    .pulse {
+      font-size: 90px;
+      animation: pulse 1.8s infinite;
+    }
+
+    @keyframes pulse {
+      50% {
+        transform: scale(1.15);
+      }
+    }
+
+    .sparkle {
+      position: fixed;
+      width: 3px;
+      height: 3px;
+      background: white;
+      border-radius: 50%;
+      opacity: .58;
+      pointer-events: none;
+      animation: twinkle 3.8s ease-in-out infinite;
+      z-index: 0;
+    }
+
+    @keyframes twinkle {
+      0%,
+      100% {
+        opacity: .18;
+        transform: translateY(0);
+      }
+
+      50% {
+        opacity: .8;
+        transform: translateY(-8px);
+      }
+    }
+
+    main,
+    .music-player {
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      text-align: center;
+      padding: 24px 20px 90px;
+    }
+
+    .hero h2 {
+      max-width: 800px;
+      color: var(--paper);
+      font-weight: 400;
+      font-size: clamp(1.05rem, 2vw, 1.45rem);
+      margin-bottom: 20px;
+    }
+
+    .hero h1 {
+      max-width: 980px;
+      color: var(--red);
+      font-size: clamp(2.35rem, 8vw, 4.6rem);
+      line-height: 1.05;
+      text-shadow:
+        0 0 20px rgba(255, 53, 94, .52),
+        0 0 60px rgba(255, 53, 94, .3);
+    }
+
+    .hero-note {
+      max-width: 620px;
+      margin-top: 24px;
+      color: rgba(255, 244, 236, .8);
+      font-size: 1rem;
+      line-height: 1.8;
+    }
+
+    .counters {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 14px;
+      margin-top: 32px;
+    }
+
+    .counter-pill {
+      min-width: min(100%, 290px);
+      padding: 14px 18px;
+      border: 1px solid rgba(255, 255, 255, .13);
+      border-radius: 8px;
+      background: rgba(5, 5, 5, .45);
+      color: var(--rose);
+      box-shadow: 0 0 30px rgba(255, 53, 94, .12);
+      backdrop-filter: blur(10px);
+      font-size: 1rem;
+    }
+
+    .love-clock {
+      min-width: min(100%, 520px);
+    }
+
+    .clock-label {
+      display: block;
+      margin-bottom: 8px;
+      color: rgba(255, 244, 236, .78);
+      font-size: .82rem;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+    }
+
+    .clock-time {
+      display: block;
+      color: var(--red);
+      font-family: 'Poppins', sans-serif;
+      font-size: clamp(1.35rem, 4vw, 2.3rem);
+      font-weight: 600;
+      line-height: 1.2;
+      font-variant-numeric: tabular-nums;
+      text-shadow: 0 0 24px rgba(255, 53, 94, .25);
+    }
+
+    .clock-detail {
+      display: block;
+      margin-top: 6px;
+      color: var(--rose);
+      font-size: .92rem;
+      line-height: 1.5;
+    }
+
+    .moments {
+      padding: 30px 0 20px;
+    }
+
+    .moment {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 50px;
+      width: min(1120px, calc(100% - 36px));
+      margin: 90px auto;
+    }
+
+    .moment.right {
+      flex-direction: row-reverse;
+    }
+
+    .photo-frame {
+      position: relative;
+      width: min(450px, 100%);
+      aspect-ratio: 4 / 5;
+      flex: 0 1 450px;
+      display: grid;
+      place-items: center;
+      padding: 28px;
+      border: 2px solid rgba(255, 53, 94, .32);
+      border-radius: 8px;
+      background:
+        linear-gradient(135deg, rgba(255, 53, 94, .24), rgba(246, 197, 109, .16));
+      box-shadow:
+        0 0 25px rgba(255, 0, 60, .25),
+        0 0 80px rgba(255, 0, 60, .1);
+      transition: transform .5s ease, box-shadow .5s ease;
+      overflow: hidden;
+    }
+
+    .moment.right .photo-frame {
+      background:
+        linear-gradient(135deg, rgba(246, 197, 109, .18), rgba(255, 53, 94, .22));
+    }
+
+    .moment:nth-child(3) .photo-frame {
+      background:
+        linear-gradient(135deg, rgba(255, 138, 161, .2), rgba(5, 5, 5, .34));
+    }
+
+    .photo-frame:hover {
+      transform: scale(1.025);
+      box-shadow:
+        0 0 35px rgba(255, 0, 60, .35),
+        0 0 90px rgba(246, 197, 109, .12);
+    }
+
+    .photo-frame img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0;
+      transition: opacity .5s ease;
+    }
+
+    .photo-frame.has-photo img {
+      opacity: 1;
+    }
+
+    .photo-placeholder {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      min-height: 120px;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      border: 1px dashed rgba(255, 244, 236, .38);
+      border-radius: 8px;
+      background: rgba(0, 0, 0, .42);
+      color: var(--paper);
+      text-align: center;
+      line-height: 1.7;
+      transition: opacity .35s ease;
+    }
+
+    .photo-frame.has-photo .photo-placeholder {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .text {
+      max-width: 510px;
+      color: rgba(255, 244, 236, .9);
+      font-size: clamp(1rem, 2vw, 1.18rem);
+      line-height: 2;
+    }
+
+    .text h2 {
+      margin-bottom: 18px;
+      color: var(--gold);
+      font-size: clamp(1.65rem, 4vw, 2.5rem);
+      line-height: 1.18;
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(80px);
+      transition: opacity 1s ease, transform 1s ease;
+    }
+
+    .reveal.active {
+      opacity: 1;
+      transform: none;
+    }
+
+    .letter {
+      width: min(900px, calc(100% - 36px));
+      margin: 70px auto;
+      padding: 80px 24px;
+      text-align: center;
+      border-top: 1px solid rgba(255, 255, 255, .12);
+      border-bottom: 1px solid rgba(255, 255, 255, .12);
+    }
+
+    .letter h2 {
+      color: var(--red);
+      font-size: clamp(2rem, 6vw, 3.1rem);
+      margin-bottom: 34px;
+    }
+
+    #typing {
+      min-height: 520px;
+      color: rgba(255, 244, 236, .92);
+      white-space: pre-line;
+      font-size: clamp(1rem, 2vw, 1.15rem);
+      line-height: 2.1;
+    }
+
+    .final {
+      min-height: 92vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      text-align: center;
+      padding: 50px 20px 120px;
+    }
+
+    .final h1 {
+      color: var(--red);
+      font-size: clamp(2.4rem, 8vw, 4rem);
+      line-height: 1.1;
+      margin-bottom: 20px;
+    }
+
+    .final p {
+      max-width: 680px;
+      color: rgba(255, 244, 236, .82);
+      line-height: 2;
+      font-size: 1.1rem;
+    }
+
+    .music-player {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      width: min(390px, calc(100vw - 32px));
+      display: grid;
+      grid-template-columns: 58px 1fr;
+      gap: 12px;
+      padding: 12px;
+      border: 1px solid rgba(255, 255, 255, .1);
+      border-radius: 8px;
+      background: rgba(18, 18, 18, .92);
+      box-shadow: 0 18px 48px rgba(0, 0, 0, .38);
+      backdrop-filter: blur(10px);
+    }
+
+    .music-cover {
+      width: 58px;
+      height: 58px;
+      display: grid;
+      place-items: center;
+      border-radius: 6px;
+      background:
+        radial-gradient(circle at 30% 20%, rgba(255, 255, 255, .2), transparent 28%),
+        linear-gradient(135deg, #1db954, #ff355e 48%, #191414);
+      color: white;
+      font-size: 1.55rem;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, .34);
+    }
+
+    .music-info {
+      min-width: 0;
+    }
+
+    .music-title {
+      color: white;
+      font-size: .96rem;
+      font-weight: 600;
+      line-height: 1.25;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .music-artist {
+      margin-top: 2px;
+      color: #b3b3b3;
+      font-size: .78rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .spotify-controls {
+      display: grid;
+      grid-template-columns: 38px 1fr;
+      gap: 10px;
+      align-items: center;
+      margin-top: 9px;
+    }
+
+    .play-button {
+      width: 38px;
+      height: 38px;
+      border: 0;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: #1db954;
+      color: #000;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 700;
+      box-shadow: 0 0 0 0 rgba(29, 185, 84, .35);
+      transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
+    }
+
+    .play-button:hover {
+      transform: scale(1.06);
+      background: #1ed760;
+      box-shadow: 0 0 0 7px rgba(29, 185, 84, .12);
+    }
+
+    .progress-wrap {
+      min-width: 0;
+    }
+
+    .time-row {
+      display: flex;
+      justify-content: space-between;
+      color: #b3b3b3;
+      font-size: .7rem;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+
+    .progress {
+      width: 100%;
+      height: 5px;
+      display: block;
+      accent-color: #1db954;
+      cursor: pointer;
+    }
+
+    .music-player audio {
+      display: none;
+    }
+
+    .music-player.playing .music-cover {
+      animation: coverGlow 2.4s ease-in-out infinite;
+    }
+
+    @keyframes coverGlow {
+      50% {
+        box-shadow:
+          0 10px 24px rgba(0, 0, 0, .34),
+          0 0 28px rgba(29, 185, 84, .35);
+      }
+    }
+
+    @media (max-width: 900px) {
+      .hero {
+        align-items: flex-start;
+        text-align: left;
+      }
+
+      .counters {
+        justify-content: flex-start;
+      }
+
+      .moment,
+      .moment.right {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 28px;
+        margin: 70px auto;
+      }
+
+      .photo-frame {
+        width: 100%;
+        flex-basis: auto;
+      }
+
+      .letter {
+        padding: 62px 0;
+      }
+
+      #typing {
+        min-height: 640px;
+        text-align: left;
+      }
+
+      .music-player {
+        right: 16px;
+        bottom: 16px;
+      }
+    }
+  </style>
+</head>
+<body class="access-locked">
+  <section class="access-screen" id="accessScreen" aria-label="Acesso protegido">
+    <div class="access-box">
+      <h1>Uma data especial</h1>
+      <p>Digite a senha com 8 numeros para abrir a surpresa.</p>
+      <div class="password-digits" id="passwordDigits">
+        <input aria-label="Digito 1 da senha" inputmode="numeric" maxlength="1" autocomplete="off">
+        <input aria-label="Digito 2 da senha" inputmode="numeric" maxlength="1" autocomplete="off">
+        <input aria-label="Digito 3 da senha" inputmode="numeric" maxlength="1" autocomplete="off">
+        <input aria-label="Digito 4 da senha" inputmode="numeric" maxlength="1" autocomplete="off">
+        <input aria-label="Digito 5 da senha" inputmode="numeric" maxlength="1" autocomplete="off">
+        <input aria-label="Digito 6 da senha" inputmode="numeric" maxlength="1" autocomplete="off">
+        <input aria-label="Digito 7 da senha" inputmode="numeric" maxlength="1" autocomplete="off">
+        <input aria-label="Digito 8 da senha" inputmode="numeric" maxlength="1" autocomplete="off">
+      </div>
+      <div class="password-error" id="passwordError" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <div class="loader" id="loader">
+    <div class="pulse">❤️</div>
+    <h2>Para Layra</h2>
+    <p>Uma surpresa está sendo preparada...</p>
+  </div>
+
+  <main>
+    <section class="hero">
+      <h2>Para a mulher que mudou minha vida</h2>
+      <h1>Layra Witoria Behren Britto</h1>
+      <p class="hero-note">Um cantinho feito para guardar o nosso tempo, nossas lembranças e tudo que eu sinto por você.</p>
+      <div class="counters" aria-live="polite">
+        <div class="counter-pill" id="contador"></div>
+        <div class="counter-pill" id="diaNamorados"></div>
+      </div>
+    </section>
+
+    <section class="moments" aria-label="Nossos momentos">
+      <article class="moment reveal">
+        <div class="photo-frame">
+          <img src="photos/foto-1.jpg" alt="Nossa primeira lembrança juntos">
+          <div class="photo-placeholder">Coloque uma foto em<br>photos/foto-1.jpg</div>
+        </div>
+        <div class="text">
+          <h2>O começo</h2>
+          <p>Desde o primeiro momento, você deixou meus dias mais leves. O que era simples virou memória boa, e o que era rotina ganhou um brilho que só você sabe trazer.</p>
+        </div>
+      </article>
+
+      <article class="moment right reveal">
+        <div class="photo-frame">
+          <img src="photos/foto-2.jpg" alt="Um momento especial nosso">
+          <div class="photo-placeholder">Coloque uma foto em<br>photos/foto-2.jpg</div>
+        </div>
+        <div class="text">
+          <h2>O nosso jeito</h2>
+          <p>Entre conversas, risadas, carinho e saudade, a gente foi construindo uma história só nossa. E eu gosto de cada detalhe dela.</p>
+        </div>
+      </article>
+
+      <article class="moment reveal">
+        <div class="photo-frame">
+          <img src="photos/foto-3.jpg" alt="Uma foto que guarda nosso carinho">
+          <div class="photo-placeholder">Coloque uma foto em<br>photos/foto-3.jpg</div>
+        </div>
+        <div class="text">
+          <h2>Meu lugar favorito</h2>
+          <p>Seu abraço tem paz, seu sorriso tem casa, e estar com você faz qualquer dia parecer especial.</p>
+        </div>
+      </article>
+
+      <article class="moment right reveal">
+        <div class="photo-frame">
+          <img src="photos/foto-4.jpg" alt="Nós dois olhando a paisagem juntos">
+          <div class="photo-placeholder">Coloque uma foto em<br>photos/foto-4.jpg</div>
+        </div>
+        <div class="text">
+          <h2>Ao seu lado</h2>
+          <p>Com você, até olhar para o horizonte vira lembrança. Eu gosto de imaginar nosso futuro assim: lado a lado, escolhendo ficar.</p>
+        </div>
+      </article>
+
+      <article class="moment reveal">
+        <div class="photo-frame">
+          <img src="photos/foto-5.jpg" alt="Nós dois abraçados no espelho">
+          <div class="photo-placeholder">Coloque uma foto em<br>photos/foto-5.jpg</div>
+        </div>
+        <div class="text">
+          <h2>O carinho de sempre</h2>
+          <p>Tem momentos que parecem pequenos, mas ficam guardados para sempre. Você é minha pessoa favorita nesses instantes e em todos os outros.</p>
+        </div>
+      </article>
+    </section>
+
+    <section class="letter reveal">
+      <h2>Uma carta para você</h2>
+      <p id="typing"></p>
+    </section>
+
+    <section class="final reveal">
+      <h1>Eu te amo infinitamente</h1>
+      <p>Que esse Dia dos Namorados seja só mais uma das muitas datas bonitas que ainda vamos viver juntos.</p>
+    </section>
+  </main>
+
+  <div class="music-player" id="musicPlayer">
+    <div class="music-cover" aria-hidden="true">♪</div>
+    <div class="music-info">
+      <div class="music-title">Promiscuous</div>
+      <div class="music-artist">Nelly Furtado ft. Timbaland</div>
+      <div class="spotify-controls">
+        <button class="play-button" id="playButton" type="button" aria-label="Tocar musica">▶</button>
+        <div class="progress-wrap">
+          <div class="time-row">
+            <span id="currentTime">0:00</span>
+            <span id="duration">0:00</span>
+          </div>
+          <input class="progress" id="progressBar" type="range" value="0" min="0" max="100" step="0.1" aria-label="Progresso da musica">
+        </div>
+      </div>
+      <audio id="audioPlayer" preload="metadata">
+        <source src="music/promiscuous.mp3" type="audio/mpeg">
+        Seu navegador não conseguiu carregar a musica.
+      </audio>
+    </div>
+  </div>
+
+  <script>
+    const loader = document.getElementById('loader');
+    const accessScreen = document.getElementById('accessScreen');
+    const passwordError = document.getElementById('passwordError');
+    const passwordInputs = Array.from(document.querySelectorAll('#passwordDigits input'));
+    const contador = document.getElementById('contador');
+    const diaNamorados = document.getElementById('diaNamorados');
+    const typing = document.getElementById('typing');
+    const musicPlayer = document.getElementById('musicPlayer');
+    const audioPlayer = document.getElementById('audioPlayer');
+    const playButton = document.getElementById('playButton');
+    const progressBar = document.getElementById('progressBar');
+    const currentTime = document.getElementById('currentTime');
+    const duration = document.getElementById('duration');
+    const inicio = new Date(2024, 11, 6);
+    const senhaCorreta = '06122024';
+    let acessoLiberado = false;
+    let paginaCarregada = false;
+    let cartaIniciada = false;
+    const texto = `Layra,
+
+Desde que você entrou na minha vida,
+tudo ficou mais bonito.
+
+Você transformou momentos simples
+em lembranças inesquecíveis.
+
+Seu sorriso ilumina meus dias,
+seu abraço é meu lugar favorito
+e sua presença faz qualquer momento valer a pena.
+
+Obrigado por cada conversa,
+cada risada,
+cada carinho
+e por me permitir viver tudo isso.
+
+Meu maior acerto foi ter escolhido você.
+
+Eu te amo infinitamente. ❤️
+
+— Ivan`;
+
+    window.addEventListener('load', () => {
+      paginaCarregada = true;
+      passwordInputs[0].focus();
+      esconderLoader();
+    });
+
+    function senhaDigitada() {
+      return passwordInputs.map((input) => input.value).join('');
+    }
+
+    function limparSenha() {
+      passwordInputs.forEach((input) => {
+        input.value = '';
+      });
+      passwordInputs[0].focus();
+    }
+
+    function esconderLoader() {
+      if (!acessoLiberado || !paginaCarregada) {
+        return;
+      }
+
+      setTimeout(() => {
+        loader.classList.add('hide');
+      }, 1200);
+    }
+
+    function iniciarCarta() {
+      if (cartaIniciada) {
+        return;
+      }
+
+      cartaIniciada = true;
+      setTimeout(digitar, 1600);
+    }
+
+    function liberarAcesso() {
+      acessoLiberado = true;
+      passwordError.textContent = '';
+      document.body.classList.remove('access-locked');
+      accessScreen.classList.add('hide');
+      esconderLoader();
+      iniciarCarta();
+    }
+
+    function validarSenha() {
+      if (senhaDigitada() === senhaCorreta) {
+        liberarAcesso();
+        return;
+      }
+
+      passwordError.textContent = 'Senha incorreta. Tente novamente.';
+      limparSenha();
+    }
+
+    passwordInputs.forEach((input, index) => {
+      input.addEventListener('input', () => {
+        input.value = input.value.replace(/\D/g, '').slice(-1);
+        passwordError.textContent = '';
+
+        if (input.value && index < passwordInputs.length - 1) {
+          passwordInputs[index + 1].focus();
+        }
+
+        if (senhaDigitada().length === senhaCorreta.length) {
+          validarSenha();
+        }
+      });
+
+      input.addEventListener('keydown', (event) => {
+        if (event.key === 'Backspace' && !input.value && index > 0) {
+          passwordInputs[index - 1].focus();
+        }
+      });
+
+      input.addEventListener('paste', (event) => {
+        event.preventDefault();
+        const pasted = event.clipboardData.getData('text').replace(/\D/g, '').slice(0, senhaCorreta.length);
+
+        passwordInputs.forEach((field, fieldIndex) => {
+          field.value = pasted[fieldIndex] || '';
+        });
+
+        const nextEmpty = passwordInputs.find((field) => !field.value);
+        (nextEmpty || passwordInputs[passwordInputs.length - 1]).focus();
+
+        if (senhaDigitada().length === senhaCorreta.length) {
+          validarSenha();
+        }
+      });
+    });
+
+    document.querySelectorAll('.photo-frame img').forEach((image) => {
+      image.addEventListener('load', () => {
+        image.parentElement.classList.add('has-photo');
+      });
+
+      image.addEventListener('error', () => {
+        image.remove();
+      });
+    });
+
+    function formatarTempo(segundos) {
+      if (!Number.isFinite(segundos)) {
+        return '0:00';
+      }
+
+      const minutos = Math.floor(segundos / 60);
+      const resto = Math.floor(segundos % 60).toString().padStart(2, '0');
+      return `${minutos}:${resto}`;
+    }
+
+    function atualizarPlayer() {
+      const duracao = audioPlayer.duration || 0;
+      const atual = audioPlayer.currentTime || 0;
+
+      currentTime.textContent = formatarTempo(atual);
+      duration.textContent = formatarTempo(duracao);
+      progressBar.value = duracao ? (atual / duracao) * 100 : 0;
+    }
+
+    playButton.addEventListener('click', async () => {
+      if (audioPlayer.paused) {
+        await audioPlayer.play();
+      } else {
+        audioPlayer.pause();
+      }
+    });
+
+    audioPlayer.addEventListener('play', () => {
+      musicPlayer.classList.add('playing');
+      playButton.textContent = '❚❚';
+      playButton.setAttribute('aria-label', 'Pausar musica');
+    });
+
+    audioPlayer.addEventListener('pause', () => {
+      musicPlayer.classList.remove('playing');
+      playButton.textContent = '▶';
+      playButton.setAttribute('aria-label', 'Tocar musica');
+    });
+
+    audioPlayer.addEventListener('loadedmetadata', atualizarPlayer);
+    audioPlayer.addEventListener('timeupdate', atualizarPlayer);
+    audioPlayer.addEventListener('ended', () => {
+      progressBar.value = 0;
+      audioPlayer.currentTime = 0;
+    });
+
+    progressBar.addEventListener('input', () => {
+      if (audioPlayer.duration) {
+        audioPlayer.currentTime = (progressBar.value / 100) * audioPlayer.duration;
+      }
+    });
+
+    for (let i = 0; i < 90; i++) {
+      const sparkle = document.createElement('div');
+      sparkle.className = 'sparkle';
+      sparkle.style.left = `${Math.random() * 100}vw`;
+      sparkle.style.top = `${Math.random() * 100}vh`;
+      sparkle.style.animationDelay = `${Math.random() * 4}s`;
+      document.body.appendChild(sparkle);
+    }
+
+    function diasNoMes(ano, mes) {
+      return new Date(ano, mes + 1, 0).getDate();
+    }
+
+    function tempoJuntos(dataInicial, dataFinal) {
+      let anos = dataFinal.getFullYear() - dataInicial.getFullYear();
+      let meses = dataFinal.getMonth() - dataInicial.getMonth();
+      let dias = dataFinal.getDate() - dataInicial.getDate();
+
+      if (dias < 0) {
+        meses--;
+        const mesAnterior = (dataFinal.getMonth() + 11) % 12;
+        const anoDoMesAnterior = mesAnterior === 11 ? dataFinal.getFullYear() - 1 : dataFinal.getFullYear();
+        dias += diasNoMes(anoDoMesAnterior, mesAnterior);
+      }
+
+      if (meses < 0) {
+        anos--;
+        meses += 12;
+      }
+
+      return { anos, meses, dias };
+    }
+
+    function atualizarContadores() {
+      const hoje = new Date();
+      const { anos, meses, dias } = tempoJuntos(inicio, hoje);
+      const horas = hoje.getHours().toString().padStart(2, '0');
+      const minutos = hoje.getMinutes().toString().padStart(2, '0');
+      const segundos = hoje.getSeconds().toString().padStart(2, '0');
+      const anoAlvo = hoje > new Date(hoje.getFullYear(), 5, 12, 23, 59, 59) ? hoje.getFullYear() + 1 : hoje.getFullYear();
+      const diaDosNamorados = new Date(anoAlvo, 5, 12);
+      const faltam = Math.max(0, Math.ceil((diaDosNamorados - hoje) / (1000 * 60 * 60 * 24)));
+
+      contador.classList.add('love-clock');
+      contador.innerHTML = `
+        <span class="clock-label">Estamos juntos há</span>
+        <span class="clock-time">${anos}a ${meses}m ${dias}d ${horas}:${minutos}:${segundos}</span>
+        <span class="clock-detail">${anos} ano(s), ${meses} mês(es), ${dias} dia(s), ${horas} hora(s), ${minutos} minuto(s) e ${segundos} segundo(s)</span>
+      `;
+      diaNamorados.innerHTML = faltam === 0
+        ? 'Hoje é Dia dos Namorados no Brasil ❤️'
+        : `Faltam ${faltam} dia(s) para 12 de junho`;
+    }
+
+    function digitar(index = 0) {
+      if (index < texto.length) {
+        typing.textContent += texto.charAt(index);
+        setTimeout(() => digitar(index + 1), 35);
+      }
+    }
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('active');
+        }
+      });
+    }, { threshold: .18 });
+
+    document.querySelectorAll('.reveal').forEach((element) => observer.observe(element));
+
+    atualizarContadores();
+    setInterval(atualizarContadores, 1000);
+  </script>
+</body>
+</html>
